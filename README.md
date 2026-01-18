@@ -1,277 +1,297 @@
-# WCR: Wayland Custom Resolution
 
-![Version](https://img.shields.io/badge/version-3.0--gold-blue)
+# WCR - Wayland Custom Resolution Patcher 🖥️⚡
+
+![Version](https://img.shields.io/badge/version-5.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Platform](https://img.shields.io/badge/platform-Arch%20Linux-informational)
+![Platform](https://img.shields.io/badge/platform-Linux-orange)
 
-**Universal EDID Patcher for Unlocking Monitor Refresh Rates on Linux Wayland**
+**Production-grade EDID patcher for unlocking custom refresh rates on Linux.**
 
----
+Bypass monitor refresh rate limitations by patching EDID firmware at boot time. Perfect for overclocking monitors beyond their stock 60Hz limit on Wayland/X11.
 
-## ⚠️ **CRITICAL SAFETY WARNING**
+## ✨ Features
 
-### **READ THIS BEFORE USING WCR - HARDWARE DAMAGE IS POSSIBLE**
+- **🎯 Zero Dependencies**: GPU detection via sysfs (no `pciutils` required)
+- **🔒 Safe & Reversible**: Automatic backups of all modified configs
+- **🧠 Intelligent**: Auto-detects NVIDIA/AMD/Intel and only injects required parameters
+- **🌐 Universal**: Arch, Manjaro, Debian, Ubuntu, EndeavourOS compatible
+- **📦 Modular**: Uses modern `.conf.d/` directories when available
+- **🛡️ Robust**: Full error logging, validated backups, no silent failures
+- **🌍 Bilingual**: English and Spanish interface
 
-> **WCR modifies low-level display timings. Using it incorrectly can PERMANENTLY DAMAGE your monitor.**
+## 🔧 Technical Highlights
 
-#### **You Must:**
+This script leverages Linux kernel's EDID override mechanism and VESA CVT timing specifications to:
 
-1. **Know Your Monitor's Safe Limits**
-   - Research your panel model (not brand model)
-   - Common IPS 1080p@60Hz panels often support 75-90Hz safely
-   - VA panels may support 75Hz
-   - TN panels sometimes support up to 100Hz
-   - **Going beyond safe limits can burn pixels, damage backlight, or destroy the panel**
+- Preserve CEA-861 extension blocks (HDR, HDMI audio, advanced features)
+- Use VESA CVT-RBv2 timing calculations for accurate pixel clocks
+- Detect GRUB vs systemd-boot automatically
+- Only modify EDID Block 0 (detailed timings), leaving extension blocks intact
+- Validate GRUB.d/ sourcing before using modular configs (Arch Linux compatible)
 
-2. **Test Incrementally**
-   - Start with +5Hz above stock (e.g., 60Hz → 65Hz)
-   - Watch for flickering, artifacts, color banding, or screen blanking
-   - Increase by 5Hz at a time
-   - **The first sign of instability is your hard limit - go back 5-10Hz**
+## 📋 Requirements
 
-3. **Accept Full Responsibility**
-   - We provide this tool for educational purposes
-   - **You are 100% responsible for any hardware damage**
-   - There is NO WARRANTY of any kind
+- **OS**: Linux with kernel 4.15+ (supports `drm.edid_firmware`)
+- **Bootloader**: GRUB or systemd-boot
+- **Python**: 3.6+
+- **Privileges**: Root access (for initramfs/bootloader modification)
 
-#### **Symptoms of Damage:**
-- Permanent screen flickering
-- Dead/stuck pixels
-- Color distortion
-- Backlight failure
-- Complete display failure
+### Tested Distributions
 
-**If you're not comfortable with these risks, DO NOT USE THIS TOOL.**
-
----
-
-## 🎯 What is WCR?
-
-WCR (Wayland Custom Resolution) is an EDID (Extended Display Identification Data) patcher that allows you to unlock custom refresh rates on monitors artificially limited by manufacturer firmware. Many 60Hz monitors use panels capable of 75Hz or higher, but the EDID restricts them for market segmentation.
-
-### Key Features
-
-- ✅ **VESA CVT-RBv2 Compliant**: Industry-standard reduced blanking calculations
-- ✅ **Automatic Detection**: Scans all connected displays
-- ✅ **Safe Backups**: Auto-creates `.wcr.bak` files before modifying configs
-- ✅ **Input Validation**: Prevents dangerous configurations (30-500Hz range checks)
-- ✅ **Multi-Component**: Configures initramfs, GRUB, and Hyprland
-- ✅ **Bilingual**: English and Spanish support
-
----
-
-## 📋 Prerequisites
-
-### System Requirements
-
-- **OS**: Arch Linux (or Arch-based: Manjaro, EndeavourOS, etc.)
-- **Display Server**: Wayland (Hyprland, Sway, etc.)
-- **Bootloader**: GRUB2
-- **Init**: systemd with mkinitcpio
-
-### Dependencies
-
-```bash
-sudo pacman -S python3 base-devel grub
-```
-
----
+| Distribution | Status | Notes |
+|--------------|--------|-------|
+| Arch Linux   | ✅ | Fully supported (mkinitcpio + GRUB) |
+| Manjaro      | ✅ | Fully supported |
+| EndeavourOS  | ✅ | Fully supported |
+| Debian 11+   | ✅ | Supports GRUB.d/ modular configs |
+| Ubuntu 20.04+| ✅ | Supports GRUB.d/ modular configs |
 
 ## 🚀 Installation
 
-### 1. Clone the Repository
+### Quick Install
 
 ```bash
-git clone https://github.com/yourrepo/wcr.git
+# Download script
+curl -LO https://raw.githubusercontent.com/YOUR_USERNAME/wcr/main/wcr.sh
+chmod +x wcr.sh
+
+# Run as root
+sudo ./wcr.sh
+```
+
+### Manual Installation
+
+```bash
+git clone https://github.com/YOUR_USERNAME/wcr.git
 cd wcr
-chmod +x install_wcr.sh
+chmod +x wcr.sh
+sudo ./wcr.sh
 ```
 
-### 2. Run as Root
+## 📖 Usage
+
+### Basic Workflow
+
+1. Run the script as root
 
 ```bash
-sudo ./install_wcr.sh
+sudo ./wcr.sh
 ```
 
-### 3. Follow Interactive Prompts
+2. Select language (English/Español)
+
+3. Choose your monitor from the detected list
 
 ```
-Select language [1/2]: 1
-[*] Detecting monitors...
 1) DP-1
-2) HDMI-A-1
-Select monitor to unlock:
-> 1
-Target Refresh Rate (Hz) [range: 30-500]: 75
-Detected resolution: 1920x1080. Correct? (y/n): y
-Configure Hyprland auto? (y/n): y
-[✔] DONE. Reboot to apply.
+2) HDMI-1
+3) eDP-1
 ```
 
-### 4. Reboot
+4. Enter target refresh rate
 
-```bash
-sudo reboot
+```
+Refresh Rate (Hz) [30-500]: 75
 ```
 
----
+5. Confirm or modify resolution
 
-## 📖 Usage Examples
-
-### Example 1: Standard 1080p@75Hz
-
-**Scenario**: You have a 1920x1080@60Hz monitor with IPS panel verified to support 75Hz.
-
-```bash
-sudo ./install_wcr.sh
-# Select monitor → Enter 75 → Confirm resolution → Reboot
+```
+Detected: 1920x1080. Correct? (y/n): y
 ```
 
-### Example 2: Ultrawide 2560x1080@100Hz
+6. Optional: Let script configure bootloader (GRUB/systemd-boot)
 
-**Scenario**: Custom resolution ultrawide.
+7. Reboot to apply changes
 
 ```bash
-sudo ./install_wcr.sh
-# Select monitor → Enter 100
-# Detected resolution: 1920x1080. Correct? (y/n): n
-# Enter Width and Height: 2560 1080
+reboot
 ```
 
----
+### Advanced Usage
 
-## 🛠️ How It Works
+#### Manual Bootloader Configuration (systemd-boot)
 
-### Technical Overview
+If using systemd-boot, add to your kernel parameters in `/boot/loader/entries/*.conf`:
 
-WCR patches the EDID using VESA CVT Reduced Blanking v2 standard:
+```
+options ... drm.edid_firmware=DP-1:edid/DP-1_1920x1080_75hz.bin video=DP-1:1920x1080@75
+```
 
-1. **Reads existing EDID** from `/sys/class/drm/card*/edid`
-2. **Calculates new timings** using CVT-RBv2 algorithm
-3. **Injects modified DTD** (Detailed Timing Descriptor) at offset 54
-4. **Fixes EDID checksum** (byte 127)
-5. **Installs to initramfs** via mkinitcpio
-6. **Adds kernel parameters** to GRUB:
-   ```
-   drm.edid_firmware=DP-1:edid/custom_res.bin
-   video=DP-1:1920x1080@75
-   ```
-
-### Modified Files
-
-| File | Purpose | Backup Location |
-|------|---------|-----------------|
-| `/etc/mkinitcpio.conf` | Loads EDID into initramfs | `.wcr.bak` |
-| `/etc/default/grub` | Kernel boot parameters | `.wcr.bak` |
-| `/usr/lib/firmware/edid/custom_res.bin` | Patched EDID binary | N/A |
-| `~/.config/hypr/hyprland.conf` | Display config (optional) | `.wcr.bak` |
-
----
-
-## 🔧 Troubleshooting
-
-### Display Not Working After Reboot
-
-**Cause**: Refresh rate too high or incompatible EDID.
-
-**Solution**: Boot into recovery mode and restore backups:
+#### Custom Resolution
 
 ```bash
-# Hold Shift during GRUB to enter recovery
-sudo cp /etc/default/grub.wcr.bak /etc/default/grub
-sudo cp /etc/mkinitcpio.conf.wcr.bak /etc/mkinitcpio.conf
+# Example: 2560x1440 at 144Hz
+sudo ./wcr.sh
+# Select monitor → Enter 144 → Enter 'n' → Enter 2560 1440
+```
+
+#### Multi-Monitor Setup
+
+Run the script multiple times, once per monitor. Each EDID is named uniquely by port:
+
+```
+/usr/lib/firmware/edid/
+├── DP-1_1920x1080_75hz.bin
+├── HDMI-1_1920x1080_60hz.bin
+└── eDP-1_2560x1440_165hz.bin
+```
+
+## 🔍 How It Works
+
+### Architecture
+
+```
+┌─────────────────┐
+│  Original EDID  │  Read from /sys/class/drm/card*/edid
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Python CVT-RBv2 │  Calculate new timing parameters
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Patched EDID   │  Modify Block 0, preserve extensions
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│/usr/lib/firmware│ Install patched EDID
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  mkinitcpio     │  Embed in initramfs
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  GRUB Config    │  Add kernel parameters
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│     Reboot      │  Kernel loads patched EDID at boot
+└─────────────────┘
+```
+
+### EDID Modification Details
+
+The script modifies only the first Detailed Timing Descriptor (DTD) at offset 54-71 in EDID Block 0, preserving:
+
+- ✅ CEA-861 Extension Blocks (HDR metadata)
+- ✅ HDMI/DisplayPort audio capabilities
+- ✅ Manufacturer-specific quirks
+- ✅ Color space definitions
+
+## 🐛 Troubleshooting
+
+### Monitor Still Shows Old Refresh Rate
+
+**Check kernel parameters are applied:**
+
+```bash
+cat /proc/cmdline | grep drm.edid_firmware
+```
+
+**Verify EDID is in initramfs:**
+
+```bash
+lsinitcpio /boot/initramfs-linux.img | grep edid
+```
+
+**Force EDID reload (Wayland):**
+
+```bash
+# Hyprland
+hyprctl reload
+
+# Sway
+swaymsg reload
+```
+
+### mkinitcpio Fails
+
+**Check disk space:**
+
+```bash
+df -h /boot
+```
+
+**Manually verify FILES entry:**
+
+```bash
+grep FILES /etc/mkinitcpio.conf
+# Or check modular config:
+cat /etc/mkinitcpio.conf.d/wcr-edid.conf
+```
+
+### GRUB Changes Not Applied
+
+**Verify grub.d/ sourcing (Arch Linux issue):**
+
+```bash
+grep -E "for.*grub\.d|source.*grub\.d" /etc/default/grub
+```
+
+If no output, the script will use direct injection instead.
+
+**Regenerate GRUB manually:**
+
+```bash
 sudo grub-mkconfig -o /boot/grub/grub.cfg
-sudo mkinitcpio -P
-sudo reboot
 ```
 
-### Screen Flickering or Artifacts
+### Black Screen After Reboot
 
-**Cause**: Refresh rate exceeds panel capabilities.
+1. Boot into recovery/live USB
 
-**Solution**: Reduce by 5-10Hz and reinstall.
-
-### "No Signal" on Monitor
-
-**Cause**: Monitor rejected the EDID.
-
-**Solution**: Restore backups (see above).
-
----
-
-## 🗑️ Uninstallation
-
-To completely remove WCR:
+2. Restore backups:
 
 ```bash
-# Restore GRUB
+sudo mount /dev/sdXY /mnt
+sudo cp /mnt/etc/default/grub.wcr.bak /mnt/etc/default/grub
+sudo cp /mnt/etc/mkinitcpio.conf.wcr.bak /mnt/etc/mkinitcpio.conf
+sudo arch-chroot /mnt
+mkinitcpio -P
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+reboot
+```
+
+## 🔐 Backups
+
+All backups are created automatically with `.wcr.bak` extension:
+
+```
+/etc/mkinitcpio.conf.wcr.bak
+/etc/default/grub.wcr.bak
+~/.config/hypr/hyprland.conf.wcr.bak  (if Hyprland configured)
+```
+
+**Restore a backup:**
+
+```bash
 sudo cp /etc/default/grub.wcr.bak /etc/default/grub
 sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-# Restore mkinitcpio
-sudo cp /etc/mkinitcpio.conf.wcr.bak /etc/mkinitcpio.conf
-sudo mkinitcpio -P
-
-# Remove EDID
-sudo rm /usr/lib/firmware/edid/custom_res.bin
-
-# Reboot
-sudo reboot
 ```
 
----
+## ⚠️ Limitations
 
-## ❓ FAQ
+- Does NOT work on proprietary drivers (Wayland limitation, not script)
+- Refresh rate must be within monitor's physical capabilities (no magic, electronics still apply)
+- NVIDIA + Wayland: Requires `nvidia-drm.modeset=1` (script handles automatically)
+- Laptop panels: Some eDP panels ignore custom EDIDs
 
-**Q: Can this damage my monitor?**  
-A: **Yes**, if you exceed safe operating limits. Always research your panel first.
+## 🤝 Contributing
 
-**Q: Does this work on X11?**  
-A: This version is optimized for Wayland. X11 requires different configuration.
+Contributions welcome! Please:
 
-**Q: My monitor already supports 144Hz. Do I need this?**  
-A: No. WCR is for unlocking artificially limited displays.
+- Test on your distribution
+- Report compatibility issues
+- Submit pull requests with clear descriptions
 
-**Q: NVIDIA GPU support?**  
-A: Yes. WCR automatically adds `nvidia-drm.modeset=1` to GRUB.
 
-**Q: Can I use this on other distros?**  
-A: Only Arch-based distros with mkinitcpio are currently supported.
-
----
-
-## 📄 License
-
-```
-MIT License
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
-
-**By using WCR, you accept full responsibility for any hardware damage or data loss.**
-
----
-
-## 🙏 Credits
-
-- **Author**: Routel
-- **Standards**: VESA CVT v1.2, EDID v1.4
-- **Community**: Arch Linux Wiki, Hyprland Discord
-
----
-
-## ⚖️ Final Reminder
-
-> **Always overclock responsibly. Know your hardware limits. When in doubt, DON'T.**
-
-If you damage your monitor, you own the consequences. This tool is provided for advanced users who understand the risks.
-
----
-
-**Star ⭐ this repo if WCR helped you unlock your monitor safely!**
+Star ⭐ this repo if it helped you achieve buttery smooth refresh rates!
