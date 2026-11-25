@@ -1,8 +1,17 @@
-README_EN.tex
-README_ES.tex
-README_EN.log
-README_ES.log
-README_ES.toc
-README_EN.toc
-README_ES.out
-README_EN.out
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# EDIDs generados (son de tu monitor, no se suben)
+*.bin
+
+# Python
+__pycache__/
+*.pyc
+
+# Respaldos
+*.bak
+*.old
