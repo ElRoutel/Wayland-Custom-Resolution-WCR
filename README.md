@@ -30,8 +30,8 @@ Patches your monitor's EDID so its **preferred mode** becomes a custom resolutio
 ## Usage
 
 ```bash
-git clone https://github.com/ElRoutel/Wayland-Custom-Resolution-WCR-.git
-cd Wayland-Custom-Resolution-WCR-
+git clone https://github.com/ElRoutel/Wayland-Custom-Resolution-WCR.git
+cd Wayland-Custom-Resolution-WCR
 
 ./wcr.sh --dry --res 1920x1080 --hz 144          # 1. test: generate + validate, no changes
 sudo ./wcr.sh --res 1920x1080 --hz 144           # 2. install (asks before changing anything)
